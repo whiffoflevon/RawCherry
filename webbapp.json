@@ -1,0 +1,71 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.27.1.19265",
+      "templateHash": "13419651792339360957"
+    }
+  },
+  "parameters": {
+    "webbAppName": {
+      "type": "string",
+      "defaultValue": "webb-app1"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus"
+    },
+    "appServicePlanName": {
+      "type": "string",
+      "defaultValue": "webb-app"
+    },
+    "appServicePlanSku": {
+      "type": "string",
+      "defaultValue": "F1"
+    },
+    "appServicePlanTier": {
+      "type": "string",
+      "defaultValue": "Free"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[parameters('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('appServicePlanSku')]",
+        "tier": "[parameters('appServicePlanTier')]"
+      },
+      "properties": {
+        "perSiteScaling": false,
+        "reserved": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[parameters('webbAppName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "webAppId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Web/sites', parameters('webbAppName'))]"
+    },
+    "webAppDefaultHostName": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', parameters('webbAppName')), '2021-02-01').defaultHostName]"
+    }
+  }
+}

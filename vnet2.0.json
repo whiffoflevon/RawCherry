@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "metadata": {
+      "_generator": {
+        "name": "bicep",
+        "version": "0.27.1.19265",
+        "templateHash": "9477399913203563335"
+      }
+    },
+    "parameters": {
+      "vnetName": {
+        "type": "string",
+        "defaultValue": "vnet2"
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "eastus"
+      },
+      "addressPrefix": {
+        "type": "string",
+        "defaultValue": "192.168.0.0/16"
+      },
+      "subnetName": {
+        "type": "string",
+        "defaultValue": "subnet2"
+      },
+      "subnetPrefix": {
+        "type": "string",
+        "defaultValue": "192.168.0.0/24"
+      },
+      "nicName": {
+        "type": "string",
+        "defaultValue": "nic2"
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2021-02-01",
+        "name": "[parameters('vnetName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[parameters('addressPrefix')]"
+            ]
+          },
+          "subnets": [
+            {
+              "name": "[parameters('subnetName')]",
+              "properties": {
+                "addressPrefix": "[parameters('subnetPrefix')]"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2021-02-01",
+        "name": "[parameters('nicName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic", 
+                "subnet": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                }
+              }
+            }
+          ]
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+        ]
+      }
+    ]
+  }
+  

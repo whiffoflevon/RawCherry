@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.27.1.19265",
+      "templateHash": "10838883138141809914"
+    }
+  },
+  "parameters": {
+    "sqlServerName": {
+      "type": "string",
+      "defaultValue": "sqlserver"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "East US"
+    },
+    "sqlServerDatabase": {
+      "type": "string",
+      "defaultValue": "master"
+    },
+    "sqlServerUsername": {
+      "type": "string",
+      "defaultValue": "sa"
+    },
+    "sqlServerPassword": {
+      "type": "securestring"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers",
+      "apiVersion": "2021-11-01",
+      "name": "[parameters('sqlServerName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "administratorLogin": "[parameters('sqlServerUsername')]",
+        "administratorLoginPassword": "[parameters('sqlServerPassword')]",
+        "version": "12.0"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2021-11-01",
+      "name": "[format('{0}/{1}', parameters('sqlServerName'), parameters('sqlServerDatabase'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "maxSizeBytes": 1073741824
+      },
+      "sku": {
+        "name": "S0",
+        "tier": "Standard"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "sqlServerId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+    },
+    "sqlServerFqdn": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Sql/servers', parameters('sqlServerName')), '2021-11-01').fullyQualifiedDomainName]"
+    },
+    "sqlDatabaseId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Sql/servers/databases', parameters('sqlServerName'), parameters('sqlServerDatabase'))]"
+    }
+  }
+}

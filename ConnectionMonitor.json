@@ -1,0 +1,89 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "object"
+        },
+        "properties": {
+            "type": "object"
+        },
+        "id": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-07-01",
+            "name": "connectmon",
+            "location": "eastus",
+            "tags": "[parameters('tags')]",
+            "type": "Microsoft.Network/networkWatchers/connectionMonitors",
+            "properties": {
+                "endpoints": [
+                    {
+                        "name": "vnet1(MyResourceGroup)",
+                        "resourceId": "/subscriptions/52afa3b1-ee3a-442c-bcf4-b8cce9e22d9b/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1",
+                        "type": "AzureVNet",
+                        "nwExtensionInstalled": false
+                    },
+                    {
+                        "name": "vnet1(MyResourceGroup)",
+                        "resourceId": "/subscriptions/52afa3b1-ee3a-442c-bcf4-b8cce9e22d9b/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1",
+                        "type": "AzureVNet",
+                        "nwExtensionInstalled": false
+                    }
+                ],
+                "testConfigurations": [
+                    {
+                        "name": "test4",
+                        "testFrequencySec": 30,
+                        "protocol": "HTTP",
+                        "successThreshold": {
+                            "checksFailedPercent": 50,
+                            "roundTripTimeMs": 5
+                        },
+                        "httpConfiguration": {
+                            "port": 80,
+                            "method": "GET",
+                            "path": "",
+                            "requestHeaders": [],
+                            "validStatusCodeRanges": [],
+                            "preferHTTPS": false
+                        }
+                    }
+                ],
+                "testGroups": [
+                    {
+                        "name": "group1",
+                        "disable": true,
+                        "sources": [
+                            "vnet1(MyResourceGroup)"
+                        ],
+                        "destinations": [
+                            "vnet1(MyResourceGroup)"
+                        ],
+                        "testConfigurations": [
+                            "test4"
+                        ]
+                    }
+                ],
+                "outputs": [
+                    {
+                        "type": "Workspace",
+                        "workspaceSettings": {
+                            "workspaceResourceId": "/subscriptions/52afa3b1-ee3a-442c-bcf4-b8cce9e22d9b/resourceGroups/DefaultResourceGroup-EUS/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-52afa3b1-ee3a-442c-bcf4-b8cce9e22d9b-EUS"
+                        }
+                    }
+                ]
+            },
+            "id": "/subscriptions/52afa3b1-ee3a-442c-bcf4-b8cce9e22d9b/resourceGroups/networkwatcherrg/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/connectionMonitors/connectmon"
+        }
+    ]
+}

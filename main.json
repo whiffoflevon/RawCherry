@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.27.1.19265",
+      "templateHash": "15453891655252606396"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "ssjstorageaccount",
+      "minLength": 3,
+      "maxLength": 24,
+      "metadata": {
+        "description": "Provide a name for the storage account. The name must be between 3 and 24 characters long."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-08-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Premium_LRS"
+      },
+      "properties": {
+        "accessTier": "Cool"
+      },
+      "tags": {
+        "environment": "test",
+        "department": "IT"
+      }
+    }
+  ]
+}

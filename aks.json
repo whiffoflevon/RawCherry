@@ -1,0 +1,110 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.27.1.19265",
+      "templateHash": "16949200068307405001"
+    }
+  },
+  "parameters": {
+    "aksClusterName": {
+      "type": "string",
+      "defaultValue": "aks-cluster"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus"
+    },
+    "nodeCount": {
+      "type": "int",
+      "defaultValue": 2
+    },
+    "nodeVMSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS2_v2"
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "aks-vnet"
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "aks-subnet"
+    },
+    "dnsPrefix": {
+      "type": "string",
+      "defaultValue": "aks-cluster"
+    },
+    "servicePrincipalClientId": {
+      "type": "securestring"
+    },
+    "servicePrincipalClientSecret": {
+      "type": "securestring"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2021-05-01",
+      "name": "[parameters('vnetName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('subnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.ContainerService/managedClusters",
+      "apiVersion": "2021-03-01",
+      "name": "[parameters('aksClusterName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "dnsPrefix": "[parameters('dnsPrefix')]",
+        "agentPoolProfiles": [
+          {
+            "name": "agentpool",
+            "count": "[parameters('nodeCount')]",
+            "vmSize": "[parameters('nodeVMSize')]",
+            "osType": "Linux",
+            "vnetSubnetID": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName')), '2021-05-01').subnets[0].id]",
+            "type": "VirtualMachineScaleSets",
+            "mode": "System"
+          }
+        ],
+        "networkProfile": {
+          "networkPlugin": "azure"
+        },
+        "servicePrincipalProfile": {
+          "clientId": "[parameters('servicePrincipalClientId')]",
+          "secret": "[parameters('servicePrincipalClientSecret')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "aksClusterId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName'))]"
+    },
+    "aksClusterFqdn": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName')), '2021-03-01').fqdn]"
+    }
+  }
+}
